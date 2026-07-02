@@ -2,7 +2,10 @@
 set -euo pipefail
 
 # Integration Test: Sidecar Lifecycle
-# Tests sidecar init, status, attach, detach, and doctor using temp directories.
+# Tests the positional-discovery sidecar model (issue #579): sidecar init
+# writes to cwd/.lazyai/sidecar.yaml (or ~/.lazyai/sidecar.yaml for global
+# scope), sidecar status/doctor discover layers by walking up from cwd, and
+# there is no workspace registry and no attach/detach command.
 # Uses a temporary HOME so the real ~/.lazyai is never touched.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,24 +14,22 @@ CLI="${CLI:-$PROJECT_DIR/packages/cli/lazyai-cli}"
 
 # Temporary directories (cleaned up on exit)
 TMP_HOME=$(mktemp -d)
-TMP_PROJECT=$(mktemp -d)
 TMP_WORKSPACE=$(mktemp -d)
+TMP_PROJECT="$TMP_WORKSPACE/project"
 TMP_SIDECAR=$(mktemp -d)
-trap 'rm -rf "$TMP_HOME" "$TMP_PROJECT" "$TMP_WORKSPACE" "$TMP_SIDECAR"' EXIT
+mkdir -p "$TMP_PROJECT"
+trap 'rm -rf "$TMP_HOME" "$TMP_WORKSPACE" "$TMP_SIDECAR"' EXIT
 
 export HOME="$TMP_HOME"
-
-# Ensure ~/.lazyai exists
-mkdir -p "$TMP_HOME/.lazyai"
 
 echo "═══════════════════════════════════════════════════════════════"
 echo "🧪 Integration Test: Sidecar Lifecycle"
 echo "═══════════════════════════════════════════════════════════════"
-echo "CLI binary:     $CLI"
-echo "Temp HOME:      $TMP_HOME"
-echo "Temp project:   $TMP_PROJECT"
-echo "Temp workspace: $TMP_WORKSPACE"
-echo "Temp sidecar:   $TMP_SIDECAR"
+echo "CLI binary:      $CLI"
+echo "Temp HOME:       $TMP_HOME"
+echo "Temp workspace:  $TMP_WORKSPACE"
+echo "Temp project:    $TMP_PROJECT (child of workspace)"
+echo "Temp sidecar:    $TMP_SIDECAR"
 echo ""
 
 # Check if CLI binary exists
@@ -59,101 +60,141 @@ assert_success() {
 }
 
 # ───────────────────────────────────────────────────────────────
-# Setup: register and activate a workspace
+# Regression guard (#579): workspace registry and attach/detach
+# commands are fully removed, not silently no-op'd.
+#
+# Note: cobra's non-runnable parent commands (e.g. "sidecar", "memory")
+# print their own help and exit 0 for an unrecognized subcommand — that
+# is standard behavior across this CLI, not something #579 changed. The
+# reliable check is whether "attach"/"detach" appear in the listed
+# subcommands. The top-level "workspace" command, by contrast, has no
+# parent group to fall back to, so it correctly errors non-zero.
 # ───────────────────────────────────────────────────────────────
-echo "Setup: register workspace"
-assert_success "workspace add" "$CLI" workspace add "$TMP_WORKSPACE"
-assert_success "workspace switch" "$CLI" workspace switch "$(basename "$TMP_WORKSPACE")"
+echo "Regression: deleted commands are fully removed"
+if "$CLI" workspace >/dev/null 2>&1; then
+    echo "  ❌ 'workspace' command still exists (should be deleted)"
+    exit 1
+fi
+echo "  ✅ 'workspace' is an unknown command"
+
+SIDECAR_HELP=$("$CLI" sidecar --help 2>&1)
+if echo "$SIDECAR_HELP" | grep -qE "^[[:space:]]*attach([[:space:]]|$)"; then
+    echo "  ❌ 'sidecar attach' still listed in 'sidecar --help' (should be deleted)"
+    exit 1
+fi
+if echo "$SIDECAR_HELP" | grep -qE "^[[:space:]]*detach([[:space:]]|$)"; then
+    echo "  ❌ 'sidecar detach' still listed in 'sidecar --help' (should be deleted)"
+    exit 1
+fi
+echo "  ✅ 'sidecar attach'/'sidecar detach' are not listed subcommands"
 
 # ───────────────────────────────────────────────────────────────
-# Test 1: sidecar init (workspace scope)
+# Test 1: sidecar init --scope workspace writes to cwd/.lazyai/sidecar.yaml
 # ───────────────────────────────────────────────────────────────
 echo ""
-echo "Test 1: sidecar init --scope workspace --path <sidecar>"
-assert_success "sidecar init workspace" "$CLI" sidecar init --scope workspace --path "$TMP_SIDECAR"
+echo "Test 1: sidecar init --scope workspace --path <sidecar> (run from workspace root)"
+(cd "$TMP_WORKSPACE" && assert_success "sidecar init workspace" "$CLI" sidecar init --scope workspace --path "$TMP_SIDECAR")
 
-# Verify workspace config contains sidecar
-if grep -q "sidecar" "$TMP_HOME/.lazyai/workspaces.yaml" 2>/dev/null; then
-    echo "  ✅ Workspace config contains sidecar block"
+if [ -f "$TMP_WORKSPACE/.lazyai/sidecar.yaml" ]; then
+    echo "  ✅ Workspace sidecar file exists: $TMP_WORKSPACE/.lazyai/sidecar.yaml"
 else
-    echo "  ❌ Workspace config missing sidecar block"
+    echo "  ❌ Workspace sidecar file not created at $TMP_WORKSPACE/.lazyai/sidecar.yaml"
     exit 1
 fi
 
+if [ -f "$TMP_HOME/.lazyai/workspaces.yaml" ]; then
+    echo "  ❌ Legacy workspace registry was created (should never exist post-#579): $TMP_HOME/.lazyai/workspaces.yaml"
+    exit 1
+fi
+echo "  ✅ No workspace registry (~/.lazyai/workspaces.yaml) was created"
+
 # ───────────────────────────────────────────────────────────────
-# Test 2: sidecar status
+# Test 2: sidecar status discovers the ancestor workspace layer
+# from a child project directory (positional walk-up)
 # ───────────────────────────────────────────────────────────────
 echo ""
-echo "Test 2: sidecar status"
-STATUS_OUTPUT=$("$CLI" sidecar status 2>&1) || true
+echo "Test 2: sidecar status (run from child project dir, discovers ancestor workspace)"
+STATUS_OUTPUT=$(cd "$TMP_PROJECT" && "$CLI" sidecar status 2>&1) || true
 echo "$STATUS_OUTPUT"
-if echo "$STATUS_OUTPUT" | grep -qiE "(Scope|Config Level|Docs Dir|Specs Dir|Plans Dir)"; then
-    echo "  ✅ sidecar status shows table columns"
+if echo "$STATUS_OUTPUT" | grep -qE "workspace .*\(found\)"; then
+    echo "  ✅ sidecar status discovered the ancestor workspace layer"
 else
-    echo "  ❌ sidecar status missing expected table columns"
+    echo "  ❌ sidecar status did not report the workspace layer as found"
+    exit 1
+fi
+if echo "$STATUS_OUTPUT" | grep -qiE "(docs_dir|specs_dir|plans_dir)"; then
+    echo "  ✅ sidecar status shows resolved-path fields"
+else
+    echo "  ❌ sidecar status missing expected resolved-path fields"
     exit 1
 fi
 
 # ───────────────────────────────────────────────────────────────
-# Test 3: sidecar attach (project scope)
+# Test 3: sidecar init --scope project writes to cwd/.lazyai/sidecar.yaml
+# and takes precedence over the ancestor workspace layer
 # ───────────────────────────────────────────────────────────────
 echo ""
-echo "Test 3: sidecar attach --path <sidecar> --scope project"
-assert_success "sidecar attach project" "$CLI" sidecar attach "$TMP_PROJECT" --path "$TMP_SIDECAR/project-docs" --scope project
+echo "Test 3: sidecar init --scope project --path <sidecar> (run from child project dir)"
+mkdir -p "$TMP_SIDECAR/docs" "$TMP_SIDECAR/specs" "$TMP_SIDECAR/plans"
+(cd "$TMP_PROJECT" && assert_success "sidecar init project" "$CLI" sidecar init --scope project --path "$TMP_SIDECAR/project-docs")
+mkdir -p "$TMP_SIDECAR/project-docs/docs" "$TMP_SIDECAR/project-docs/specs" "$TMP_SIDECAR/project-docs/plans"
 
-# Verify project-level sidecar file was created
+if [ -f "$TMP_PROJECT/.lazyai/sidecar.yaml" ]; then
+    echo "  ✅ Project sidecar file exists: $TMP_PROJECT/.lazyai/sidecar.yaml"
+else
+    echo "  ❌ Project sidecar file not created at $TMP_PROJECT/.lazyai/sidecar.yaml"
+    exit 1
+fi
 if [ -f "$TMP_PROJECT/.lazyai-sidecar.yaml" ]; then
-    echo "  ✅ Project sidecar file exists: $TMP_PROJECT/.lazyai-sidecar.yaml"
+    echo "  ❌ Legacy flat .lazyai-sidecar.yaml file was produced (should never exist post-#579)"
+    exit 1
+fi
+echo "  ✅ No flat .lazyai-sidecar.yaml file was produced"
+
+PROJECT_STATUS_OUTPUT=$(cd "$TMP_PROJECT" && "$CLI" sidecar status 2>&1) || true
+echo "$PROJECT_STATUS_OUTPUT"
+if echo "$PROJECT_STATUS_OUTPUT" | grep -qE "project .*\(found\)"; then
+    echo "  ✅ sidecar status shows the project layer as found (project > workspace precedence)"
 else
-    echo "  ❌ Project sidecar file not created"
+    echo "  ❌ sidecar status did not report the project layer as found"
     exit 1
 fi
 
 # ───────────────────────────────────────────────────────────────
-# Test 4: sidecar doctor
+# Test 4: sidecar doctor validates the discovered layers cleanly
 # ───────────────────────────────────────────────────────────────
 echo ""
-echo "Test 4: sidecar doctor"
-assert_success "sidecar doctor" "$CLI" sidecar doctor
-
-# ───────────────────────────────────────────────────────────────
-# Test 5: sidecar detach (project scope)
-# ───────────────────────────────────────────────────────────────
-echo ""
-echo "Test 5: sidecar detach --scope project --force"
-assert_success "sidecar detach project" "$CLI" sidecar detach "$TMP_PROJECT" --scope project --force
-
-# Verify project-level sidecar file was removed
-if [ ! -f "$TMP_PROJECT/.lazyai-sidecar.yaml" ]; then
-    echo "  ✅ Project sidecar file removed"
-else
-    echo "  ❌ Project sidecar file still exists"
+echo "Test 4: sidecar doctor (run from child project dir)"
+DOCTOR_OUTPUT=$(cd "$TMP_PROJECT" && "$CLI" sidecar doctor 2>&1)
+DOCTOR_EXIT=$?
+echo "$DOCTOR_OUTPUT"
+if [ "$DOCTOR_EXIT" -ne 0 ]; then
+    echo "  ❌ sidecar doctor exited non-zero"
     exit 1
 fi
+if echo "$DOCTOR_OUTPUT" | grep -qE "WARN|ERROR"; then
+    echo "  ❌ sidecar doctor reported WARN/ERROR issues with fully-populated layers"
+    exit 1
+fi
+echo "  ✅ sidecar doctor: all discovered layers valid, zero issues"
 
 # ───────────────────────────────────────────────────────────────
-# Test 6: backward compat — no sidecar = graceful status
+# Test 5: backward compat — no sidecar anywhere = graceful default status
 # ───────────────────────────────────────────────────────────────
 echo ""
-echo "Test 6: Backward compatibility (no sidecar configured)"
-# Use a completely fresh temp HOME and project to avoid workspace sidecar from earlier tests
+echo "Test 5: Backward compatibility (no sidecar configured anywhere)"
 TMP_CLEAN_HOME=$(mktemp -d)
 TMP_CLEAN_PROJECT=$(mktemp -d)
-trap 'rm -rf "$TMP_HOME" "$TMP_PROJECT" "$TMP_WORKSPACE" "$TMP_SIDECAR" "$TMP_CLEAN_HOME" "$TMP_CLEAN_PROJECT"' EXIT
+trap 'rm -rf "$TMP_HOME" "$TMP_WORKSPACE" "$TMP_SIDECAR" "$TMP_CLEAN_HOME" "$TMP_CLEAN_PROJECT"' EXIT
 
-export HOME="$TMP_CLEAN_HOME"
-mkdir -p "$TMP_CLEAN_HOME/.lazyai"
-cd "$TMP_CLEAN_PROJECT"
-NO_SIDECAR_OUTPUT=$("$CLI" sidecar status 2>&1) || true
+NO_SIDECAR_OUTPUT=$(cd "$TMP_CLEAN_PROJECT" && HOME="$TMP_CLEAN_HOME" "$CLI" sidecar status 2>&1) || true
 echo "$NO_SIDECAR_OUTPUT"
-if echo "$NO_SIDECAR_OUTPUT" | grep -qiE "(default|no sidecar|none|not configured|fallback|Scope)"; then
-    echo "  ✅ No sidecar = graceful fallback"
+if echo "$NO_SIDECAR_OUTPUT" | grep -qiE "(no \.lazyai/ configuration found|not found)"; then
+    echo "  ✅ No sidecar = graceful fallback with built-in defaults"
 else
-    echo "  ⚠️  No-sidecar output unexpected (may need review)"
+    echo "  ❌ No-sidecar output missing expected fallback guidance"
+    exit 1
 fi
-
-# Restore HOME for cleanup trap
-export HOME="$TMP_HOME"
 
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
