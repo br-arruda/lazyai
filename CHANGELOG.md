@@ -4,6 +4,60 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-07-02
+
+### Added
+- **Cross-CLI agent-tools alignment** (spec 031, epic #568). New machine-readable
+  canonical `tools:` grant model (7-token vocabulary: `read`, `edit`, `shell`,
+  `search`, `web`, `mcp`, `spawn`) with per-adapter capability translation:
+  Claude Code emits `disallowedTools`, Copilot/OMP/Kiro emit `tools`, OpenCode
+  emits `permission`, Antigravity emits a subagent blueprint; Pi intentionally
+  does not map (documented non-mapping). Includes an agent-tools compatibility
+  matrix (#569-#575).
+- **Codex re-added as a compile target** (`internal/adapter/codex.go`). LazyAI
+  now supports 8 compile targets: `opencode`, `claude`, `copilot`, `pi`, `omp`,
+  `antigravity`, `kiro`, and `codex`.
+
+### Changed
+- **`.lazyai/` config directory redesign** (issue #579, ADR-008, supersedes
+  #578). Operational config now lives at a single predictable path and name
+  at every scope: `.lazyai/sidecar.yaml` (never `.lazyai-sidecar.yaml`, never
+  a variant filename). Resolution is layered with global always the base and
+  narrowest-scope-wins precedence (project > workspace > global), replacing
+  the old `~/.lazyai/workspaces.yaml` central registry with positional
+  directory-walk discovery. Project-scope config is now presence-based/opt-in
+  — running `sidecar init` with no local `.lazyai/` never silently writes to
+  the current repo unless explicitly requested.
+
+### Removed
+- **Breaking:** `sidecar attach`, `sidecar detach`, and the entire `workspace`
+  command group (`workspace add/switch/list/status`) are deleted with no
+  compat shim, replaced by positional discovery (issue #579). Existing scripts
+  calling `workspace` will see Cobra's "unknown command" error (non-zero
+  exit); `sidecar attach`/`sidecar detach` print the `sidecar` parent's help
+  text and exit 0 (Cobra's standard behavior for an unrecognized subcommand
+  under a non-runnable parent — the same as any other command group in this
+  CLI), so scripts should check for the missing action, not rely on a
+  non-zero exit code alone. Use `sidecar init [--scope workspace|project|
+  global]` from the intended directory instead. `sidecar doctor` detects a
+  stale `~/.lazyai/workspaces.yaml` and prints a one-line migration hint;
+  there is no automated conversion of its contents.
+
+### Fixed
+- **Per-adapter tool-grant derivation**: Claude agents restricted by canonical
+  tools, Copilot/OpenCode/OMP/Kiro/Antigravity tool/permission surfaces
+  derived from the same canonical grants (#569-#575).
+- **Windows file-lock resilience**: stale lock contention handling and
+  crash-safe lock cleanup on Windows.
+- **MCP/adapter drift fixes**: Copilot CLI remote MCP servers now use HTTP
+  transport (#557); Kiro remote MCP entries drop an invalid `type` field
+  (#556); Gemini CLI remote MCP emits `httpUrl` in `settings.json` (#554);
+  OMP project-scope root instructions emit to `.omp/AGENTS.md` (#560);
+  OpenCode mode files convert to the current frontmatter schema (#561);
+  Claude Code global-install hook command paths are scope-aware (#558);
+  Copilot chatmodes migrate to `.github/agents/<name>.agent.md` (#555);
+  doc-vs-implementation drift resolved across AI CLI tool pages (#563).
+
 ## [1.4.0] - 2026-06-25
 
 ### Added
