@@ -624,12 +624,6 @@ func (d *DiffViewer) renderHelp() string {
 	return helpStyle.Render(strings.Join(lines, "\n"))
 }
 
-// renderPaneContent renders styled content for a single pane.
-func (d *DiffViewer) renderPaneContent(lines []string, diffLines []DiffLine, side string, width int) string {
-	rendered := d.renderPaneLines(lines, diffLines, side, width)
-	return strings.Join(rendered, "\n")
-}
-
 // renderPaneLines renders lines with diff highlighting for a pane.
 func (d *DiffViewer) renderPaneLines(lines []string, diffLines []DiffLine, side string, width int) []string {
 	result := make([]string, 0, len(lines))
