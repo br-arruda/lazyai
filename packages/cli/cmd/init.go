@@ -499,11 +499,9 @@ func printInitNextSteps(ctx *scaffold.ScaffoldContext) {
 		fmt.Println("  lazyai-cli doctor            # full setup health check")
 	}
 
-	// Hint for workspace + sidecar flow
+	// Hint for sidecar flow
 	fmt.Println()
-	fmt.Println("Workspace & Sidecar:")
-	fmt.Println("  lazyai-cli workspace add <path> --name <name>  # Register a project")
-	fmt.Println("  lazyai-cli workspace switch <name>               # Set active workspace")
-	fmt.Println("  lazyai-cli sidecar init --path <kb-path>         # Attach a sidecar for docs/specs/plans")
+	fmt.Println("Sidecar (optional docs/specs/plans):")
+	fmt.Println("  lazyai-cli sidecar init --path <kb-path>         # Point at a docs/specs/plans directory")
 	fmt.Println("  lazyai-cli sidecar status                          # Verify resolved paths")
 }
