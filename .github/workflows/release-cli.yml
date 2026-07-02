@@ -56,9 +56,15 @@ jobs:
         env:
           VERSION: ${{ steps.metadata.outputs.version }}
         run: |
+          # Formula's `version` field must NOT include the leading "v" — the
+          # template's url already interpolates `v#{version}` to build the
+          # release download path, so passing "v1.5.0" here would render a
+          # broken "vv1.5.0" URL. The git tag/ldflags Version keeps its "v"
+          # prefix; only this formula substitution strips it.
+          HOMEBREW_VERSION="${VERSION#v}"
           SHA256_DARWIN_ARM64="$(grep 'lazyai-cli-darwin-arm64' dist/checksums.txt | cut -d' ' -f1)"
           SHA256_DARWIN_AMD64="$(grep 'lazyai-cli-darwin-amd64' dist/checksums.txt | cut -d' ' -f1)"
-          sed "s/{{VERSION}}/${VERSION}/g; s/{{SHA256_DARWIN_ARM64}}/${SHA256_DARWIN_ARM64}/g; s/{{SHA256_DARWIN_AMD64}}/${SHA256_DARWIN_AMD64}/g" \
+          sed "s/{{VERSION}}/${HOMEBREW_VERSION}/g; s/{{SHA256_DARWIN_ARM64}}/${SHA256_DARWIN_ARM64}/g; s/{{SHA256_DARWIN_AMD64}}/${SHA256_DARWIN_AMD64}/g" \
             packaging/homebrew/lazyai-cli.rb.tmpl > dist/lazyai-cli.rb
           echo "Generated dist/lazyai-cli.rb"
 
