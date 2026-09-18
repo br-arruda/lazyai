@@ -108,8 +108,10 @@ func CompileMCPForTool(toolId types.ToolId, ctx CompileContext) ([]types.Tracked
 		return compileAntigravityMCP(ctx, enabledServers)
 	case types.ToolIdCodex:
 		return compileCodexMCP(ctx, enabledServers)
+	case types.ToolIdCursor:
+		return compileCursorMCP(ctx, enabledServers)
 	default:
-		return ctx.FileRecords, fmt.Errorf("unsupported tool %q (supported tools: opencode, claude-code, copilot, pi, omp, kiro, antigravity, codex)", toolId)
+		return ctx.FileRecords, fmt.Errorf("unsupported tool %q (supported tools: opencode, claude-code, copilot, pi, omp, kiro, antigravity, codex, cursor)", toolId)
 	}
 }
 
@@ -600,6 +602,28 @@ func compileCodexMCP(ctx CompileContext, servers map[string]McpServer) ([]types.
 	hash, _ := files.FileHash(cfgPath)
 	return append(ctx.FileRecords, types.TrackedFile{
 		Path: trackedRecordPath(mcpWorkspaceRoot(ctx), cfgPath), Hash: hash, Source: "compiled:mcp:codex", Owner: types.FileOwnerUser,
+	}), nil
+}
+
+// compileCursorMCP writes the canonical MCP catalog into .cursor/mcp.json using
+// the mcpServers object shape documented for Cursor project and global config.
+// See https://cursor.com/docs/mcp.
+func compileCursorMCP(ctx CompileContext, servers map[string]McpServer) ([]types.TrackedFile, error) {
+	cursorRoot, err := ResolveToolRoot(types.ToolIdCursor, ctx.SetupScope, ctx.toAdapterContext())
+	if err != nil {
+		return nil, err
+	}
+	if err := files.EnsureDir(cursorRoot); err != nil {
+		return ctx.FileRecords, err
+	}
+	mcpPath := filepath.Join(cursorRoot, "mcp.json")
+	content := toClaudeCodeMcp(servers)
+	if err := WriteJSONFile(mcpPath, content); err != nil {
+		return ctx.FileRecords, err
+	}
+	hash, _ := files.FileHash(mcpPath)
+	return append(ctx.FileRecords, types.TrackedFile{
+		Path: trackedRecordPath(mcpWorkspaceRoot(ctx), mcpPath), Hash: hash, Source: "compiled:mcp:cursor", Owner: types.FileOwnerLibrary,
 	}), nil
 }
 

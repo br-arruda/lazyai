@@ -7,15 +7,15 @@ import (
 )
 
 // TestEveryRegisteredAdapterReportsCapabilities ensures the capability model
-// is populated for all 8 V2 targets: every adapter must carry a recognized
+// is populated for all 9 V2 targets: every adapter must carry a recognized
 // support level and emit root instructions. MCP is expected for every adapter
 // except Pi, whose CompileMCP is an intentional no-op (Pi has no native MCP
 // surface; see issue #531).
 func TestEveryRegisteredAdapterReportsCapabilities(t *testing.T) {
 	reg := NewRegistry()
 	ids := reg.List()
-	if len(ids) != 8 {
-		t.Fatalf("registry has %d adapters, want 8 (V2 targets): %v", len(ids), ids)
+	if len(ids) != 9 {
+		t.Fatalf("registry has %d adapters, want 9 (V2 targets): %v", len(ids), ids)
 	}
 	for _, id := range ids {
 		a, err := reg.Get(id)
@@ -41,10 +41,9 @@ func TestEveryRegisteredAdapterReportsCapabilities(t *testing.T) {
 }
 
 // TestNoBetaAdaptersRemain pins EC-006 / B.4: the only adapter permitted below
-// stable is the newly-added Codex adapter, whose emitted surfaces are verified
-// against official Codex docs and covered by golden/unit tests but still lack
-// runtime smoke against the Codex binary (SupportBeta). Every other adapter
-// must remain stable. See docs/adapters/snapshots/beta-adapter-verification-2026-06.md.
+// stable is Cursor (issue #612), whose emitted surfaces are verified against
+// official Cursor docs and covered by unit/golden tests but still lack full
+// runtime smoke. Every other adapter must remain stable.
 func TestNoBetaAdaptersRemain(t *testing.T) {
 	reg := NewRegistry()
 	var beta []types.ToolId
@@ -54,8 +53,8 @@ func TestNoBetaAdaptersRemain(t *testing.T) {
 			beta = append(beta, id)
 		}
 	}
-	if len(beta) != 1 || beta[0] != types.ToolIdCodex {
-		t.Fatalf("expected only codex below stable, got %v", beta)
+	if len(beta) != 1 || beta[0] != types.ToolIdCursor {
+		t.Fatalf("expected only cursor below stable, got %v", beta)
 	}
 }
 
@@ -160,5 +159,35 @@ func TestClaudeEmitsRootInstructions(t *testing.T) {
 	}
 	if cap.Support != SupportStable {
 		t.Errorf("Claude Code support = %q, want stable", cap.Support)
+	}
+}
+
+func TestCodexCapabilitiesAreStable(t *testing.T) {
+	cap := (&CodexAdapter{}).Capabilities()
+	if cap.Support != SupportStable {
+		t.Errorf("Codex support = %q, want stable", cap.Support)
+	}
+	if cap.IsBeta() {
+		t.Error("Codex must not be beta after ADR-009 promotion")
+	}
+}
+
+func TestCursorCapabilitiesMatchMinimalSurfaces(t *testing.T) {
+	cap := (&CursorAdapter{}).Capabilities()
+	if cap.Support != SupportBeta {
+		t.Errorf("Cursor support = %q, want beta", cap.Support)
+	}
+	if cap.Agents {
+		t.Error("Cursor must not declare Agents")
+	}
+	for name, ok := range map[string]bool{
+		"RootInstructions": cap.RootInstructions,
+		"Skills":           cap.Skills,
+		"Hooks":            cap.Hooks,
+		"MCP":              cap.MCP,
+	} {
+		if !ok {
+			t.Errorf("Cursor must declare verified surface %s", name)
+		}
 	}
 }

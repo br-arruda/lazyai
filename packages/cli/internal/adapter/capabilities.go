@@ -196,11 +196,10 @@ func (a *KiroAdapter) Capabilities() Capability {
 // AGENTS.md root instructions, custom subagents from .codex/agents/<name>.toml,
 // MCP from .codex/config.toml [mcp_servers.*], lifecycle hooks from
 // .codex/hooks.json, and Agent Skills from .agents/skills/<name>/SKILL.md.
-// Support is Beta: surfaces are verified against official docs and covered by
-// golden/unit tests, but runtime smoke against the Codex binary is pending.
+// Promoted to stable per ADR-009 (issue #612): docs and unit/golden coverage.
 func (a *CodexAdapter) Capabilities() Capability {
 	return Capability{
-		Support:          SupportBeta,
+		Support:          SupportStable,
 		RootInstructions: true,
 		Subagents:        true,
 		Skills:           true,
@@ -210,6 +209,22 @@ func (a *CodexAdapter) Capabilities() Capability {
 		Plugins:          true,
 		Compaction:       true,
 		Sessions:         true,
+		GlobalConfig:     true,
+	}
+}
+
+// Capabilities reports the Cursor adapter's verified surfaces. Cursor reads
+// AGENTS.md root instructions, Agent Skills from .cursor/skills/<name>/SKILL.md,
+// MCP from .cursor/mcp.json (mcpServers), and lifecycle hooks from
+// .cursor/hooks.json. LazyAI does not emit custom agent profiles or .mdc rules.
+// Support is Beta until manual Cursor IDE/CLI smoke is recorded (issue #612).
+func (a *CursorAdapter) Capabilities() Capability {
+	return Capability{
+		Support:          SupportBeta,
+		RootInstructions: true,
+		Skills:           true,
+		Hooks:            true,
+		MCP:              true,
 		GlobalConfig:     true,
 	}
 }
