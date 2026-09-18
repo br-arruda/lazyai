@@ -109,7 +109,7 @@ Concretely:
 
 ## Rationale
 
-- **Prior decisions converge on this boundary.** ADR-003 says LazyAI owns runtime = setup/compile/validate, not orchestration. ADR-005 says setup-core is the default product. ADR-006 freezes the seven-target contract. Issue #317 documents the per-target delivery matrix. Issue #319 chose docs-only for Claude workflows. Issue #318 scoped plugin/extension work to verified host mechanisms. This ADR codifies the consistent thread through all of them.
+- **Prior decisions converge on this boundary.** ADR-003 says LazyAI owns runtime = setup/compile/validate, not orchestration. ADR-005 says setup-core is the default product. ADR-009 defines the nine-target compile contract (superseding ADR-006’s target enumeration only). Issue #317 documents the per-target delivery matrix. Issue #319 chose docs-only for Claude workflows. Issue #318 scoped plugin/extension work to verified host mechanisms. This ADR codifies the consistent thread through all of them.
 
 - **Plugin/extension delegation is already a proven pattern.** LazyAI already generates `vibe-lab-hooks.js` for OpenCode, `.pi/extensions/*.ts` for Pi, and `.gemini/hooks/` for Antigravity. Extending this to workflow helpers is a natural evolution, not a new capability.
 
@@ -172,7 +172,8 @@ Concretely:
 | RAG core | **No** | Outside LazyAI product boundary |
 | Trace daemon | **No** | Outside LazyAI product boundary |
 | LangChain/LangGraph/CrewAI dependency | **No** | Outside LazyAI product boundary |
-| Codex adapter | **No** | Not a supported compile target per ADR-006 |
+| Codex adapter | **Yes** | Stable compile target (ADR-009); workflow delivery docs-only today |
+| Cursor adapter | **Yes** | Beta compile target (ADR-009); skills/MCP/hooks only; workflow delivery docs-only today |
 
 ---
 
@@ -187,6 +188,8 @@ Concretely:
 | OMP | Extension helper | `.omp/extensions/lazyai-workflows/...` | Planned per #318; requires source verification |
 | Kiro | Docs-only | Map to `.kiro/steering` and `.kiro/specs` if verified | Docs-only today |
 | Antigravity | Plugin helper | `.gemini/antigravity-cli/plugins/lazyai-workflows/` | Planned per #318; requires source verification |
+| Codex | Docs-only | No verified native workflow directory | Docs-only today |
+| Cursor | Docs-only | No verified native workflow directory; no `.mdc` workflow emit | Docs-only today |
 
 ---
 
