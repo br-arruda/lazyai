@@ -46,6 +46,10 @@ var DetectionPatterns = map[string][]string{
 	"codex": {
 		".codex",
 	},
+	"cursor": {
+		".cursor",
+		".cursor/mcp.json",
+	},
 }
 
 // AdapterNames maps adapter IDs to human-readable names.
@@ -58,6 +62,7 @@ var AdapterNames = map[string]string{
 	"kiro":        "Kiro",
 	"antigravity": "Antigravity",
 	"codex":       "Codex",
+	"cursor":      "Cursor",
 }
 
 // fileTypePatterns categorizes files by their path/name.

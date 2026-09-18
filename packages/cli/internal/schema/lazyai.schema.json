@@ -31,7 +31,9 @@
           "pi",
           "omp",
           "antigravity",
-          "kiro"
+          "kiro",
+          "codex",
+          "cursor"
         ]
       },
       "minItems": 1,

@@ -74,6 +74,7 @@ var targetAliases = map[string]types.ToolId{
 	"antigravity": types.ToolIdAntigravity,
 	"kiro":        types.ToolIdKiro,
 	"codex":       types.ToolIdCodex,
+	"cursor":      types.ToolIdCursor,
 }
 
 // canonicalToken is the preferred manifest token for each tool ID (the inverse
@@ -87,6 +88,7 @@ var canonicalToken = map[types.ToolId]string{
 	types.ToolIdAntigravity: "antigravity",
 	types.ToolIdKiro:        "kiro",
 	types.ToolIdCodex:       "codex",
+	types.ToolIdCursor:      "cursor",
 }
 
 // Path returns the manifest path for the given canonical .ai/ directory.
@@ -178,8 +180,7 @@ func (m *Manifest) resolveTargetsWithTokens() ([]types.ToolId, map[types.ToolId]
 }
 
 // ResolveTargets maps manifest target tokens to internal tool IDs, preserving
-// order and de-duplicating. Unknown tokens error; "codex" gets an explicit
-// V2-removal message.
+// order and de-duplicating. Unknown tokens error.
 func (m *Manifest) ResolveTargets() ([]types.ToolId, error) {
 	out, _, err := m.resolveTargetsWithTokens()
 	return out, err
