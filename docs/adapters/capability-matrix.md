@@ -7,14 +7,16 @@
 
 | Level | Meaning | Adapters |
 |---|---|---|
-| **stable** | Official docs verified + golden tests + smoke tests | OpenCode, Claude Code, Copilot, Pi, Kiro, OMP, Antigravity |
-| **beta** | Official docs verified + golden tests, limited runtime smoke | — |
+| **stable** | Official docs verified + golden tests + smoke tests | OpenCode, Claude Code, Copilot, Pi, Kiro, OMP, Antigravity, Codex |
+| **beta** | Official docs verified + golden tests, limited runtime smoke | Cursor |
 | **experimental** | Docs partially verified or host tool still moving quickly | — |
 | **deprecated** | Kept for migration only | — |
 
 **OMP promotion (2026-06-23, #486):** every emitted OMP surface was verified against the authoritative OMP (Oh My Pi) docs (`omp://`), clearing the docs-snapshot blocker. See [snapshots/beta-adapter-verification-2026-06.md](snapshots/beta-adapter-verification-2026-06.md).
 
-**Antigravity promotion (2026-06-23, #486):** the Antigravity IDE / Gemini CLI docs are JS-rendered and were snapshot-verified by rendering. All emitted surfaces are verified and the two former beta gaps are closed and pinned by conformance tests — global-scope skills now write `~/.gemini/config/skills/`, and root instructions are discovered (`GEMINI.md` for Gemini CLI, `.agents/rules/lazyai.md` for Antigravity IDE). No adapter remains below stable (EC-006 cleared).
+**Antigravity promotion (2026-06-23, #486):** the Antigravity IDE / Gemini CLI docs are JS-rendered and were snapshot-verified by rendering. All emitted surfaces are verified and the two former beta gaps are closed and pinned by conformance tests — global-scope skills now write `~/.gemini/config/skills/`, and root instructions are discovered (`GEMINI.md` for Gemini CLI, `.agents/rules/lazyai.md` for Antigravity IDE).
+
+**Codex and Cursor (#612, ADR-009, 2026-09):** Codex promoted to **stable**. **Cursor** is the sole **beta** adapter (skills, MCP, hooks under `.cursor/`; no custom agent profiles). See [snapshots/beta-adapter-verification-2026-09.md](snapshots/beta-adapter-verification-2026-09.md).
 
 **Compliance re-audit (2026-06-25):** an independent per-adapter audit identified eight medium-severity divergences (M1–M8). All eight were resolved and merged to `main` the same day (#554–#561). Every adapter is fully aligned with its official docs as of this date.
 
