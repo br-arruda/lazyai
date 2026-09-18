@@ -156,3 +156,19 @@ func TestReadFS_ImplementerAndRootTemplateExposeFourPointContract(t *testing.T) 
 		}
 	}
 }
+
+func TestReadFS_CursorHooksAssets(t *testing.T) {
+	fsys := testLibFS()
+	for _, path := range []string{
+		"cursor/hooks.json",
+		"cursor/hooks/lazyai/block-destructive-shell.sh",
+	} {
+		data, err := files.ReadFS(fsys, path)
+		if err != nil {
+			t.Fatalf("ReadFS %s: %v", path, err)
+		}
+		if len(data) == 0 {
+			t.Fatalf("%s is empty", path)
+		}
+	}
+}
