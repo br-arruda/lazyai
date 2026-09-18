@@ -88,6 +88,8 @@ func projectSubdir(tool types.ToolId) string {
 		return ".gemini"
 	case types.ToolIdCodex:
 		return ".codex"
+	case types.ToolIdCursor:
+		return ".cursor"
 	}
 	return ""
 }

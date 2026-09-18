@@ -13,7 +13,8 @@ Authoritative knowledge map: specs/KNOWLEDGE_MAP.md. This file is scoped/seconda
 |-----|----------|---------|--------|
 | [specs/adrs/004-vibe-lab-alignment-contract.md](../../specs/adrs/004-vibe-lab-alignment-contract.md) | Capability-first conformance to vibe-lab-compatible tool surfaces | 026 | Accepted |
 | [specs/adrs/005-core-vs-optional-modules.md](../../specs/adrs/005-core-vs-optional-modules.md) | setup-core is the default product; runtime-adjacent commands are optional modules | 026 | Accepted |
-| [specs/adrs/006-manifest-driven-compile-and-seven-target-contract.md](../../specs/adrs/006-manifest-driven-compile-and-seven-target-contract.md) | `.ai/lazyai.json` + `.ai/lock.json` define the V2 compile contract; supported targets are exactly seven; binary stays `lazyai-cli` | 029 | Accepted |
+| [specs/adrs/006-manifest-driven-compile-and-seven-target-contract.md](../../specs/adrs/006-manifest-driven-compile-and-seven-target-contract.md) | `.ai/lazyai.json` + `.ai/lock.json` define the V2 compile contract; target enumeration partially superseded by ADR-009; binary stays `lazyai-cli` | 029 | Accepted (partial supersession) |
+| [specs/adrs/009-nine-target-contract-codex-stable-cursor-beta.md](../../specs/adrs/009-nine-target-contract-codex-stable-cursor-beta.md) | Nine compile targets; Codex stable; Cursor beta (issue #612) | 612 | Accepted |
 
 ## Active Features
 

@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/lazyai/block-destructive-shell.sh"
+      }
+    ]
+  },
+  "version": 1
+}

@@ -50,6 +50,8 @@ func ResolveGlobalToolTargetDir(tool types.ToolId, homeDir string) (string, erro
 		return filepath.Join(homeDir, ".gemini"), nil
 	case types.ToolIdCodex:
 		return filepath.Join(homeDir, ".codex"), nil
+	case types.ToolIdCursor:
+		return filepath.Join(homeDir, ".cursor"), nil
 	default:
 		return "", nil
 	}
@@ -60,7 +62,7 @@ func ResolveGlobalToolTargetDir(tool types.ToolId, homeDir string) (string, erro
 // probe-aware gating (e.g., Copilot requires the copilot CLI or ~/.copilot/ presence).
 func IsGlobalSupportedTool(tool types.ToolId) bool {
 	switch tool {
-	case types.ToolIdOpenCode, types.ToolIdClaudeCode, types.ToolIdCopilot, types.ToolIdOmp, types.ToolIdKiro, types.ToolIdPi, types.ToolIdAntigravity, types.ToolIdCodex:
+	case types.ToolIdOpenCode, types.ToolIdClaudeCode, types.ToolIdCopilot, types.ToolIdOmp, types.ToolIdKiro, types.ToolIdPi, types.ToolIdAntigravity, types.ToolIdCodex, types.ToolIdCursor:
 		return true
 	default:
 		return false

@@ -461,6 +461,45 @@ func buildOutputMappings() map[types.ToolId]map[AssetKind]OutputTarget {
 				Notes: "Codex has no project system-prompt file; use AGENTS.md context",
 			},
 		},
+		types.ToolIdCursor: {
+			AssetKindAgents: {
+				Tool: types.ToolIdCursor, Kind: AssetKindAgents,
+				Shape: ShapeNone,
+				Notes: "Cursor has no LazyAI-managed custom agent profile directory; use AGENTS.md and skills",
+			},
+			AssetKindSkills: {
+				Tool: types.ToolIdCursor, Kind: AssetKindSkills,
+				SourceSubdir: "skills", DestSubdir: "skills",
+				Shape: ShapeDirPerItem,
+				Notes: "Cursor discovers Agent Skills at .cursor/skills/<name>/SKILL.md",
+			},
+			AssetKindTemplates: {
+				Tool: types.ToolIdCursor, Kind: AssetKindTemplates,
+				Shape: ShapeNone,
+				Notes: "Cursor has no template surface in LazyAI v1",
+			},
+			AssetKindCommands: {
+				Tool: types.ToolIdCursor, Kind: AssetKindCommands,
+				Shape: ShapeNone,
+				Notes: "Cursor has no slash command surface in LazyAI v1",
+			},
+			AssetKindChatModes: {
+				Tool: types.ToolIdCursor, Kind: AssetKindChatModes,
+				Shape: ShapeNone,
+			},
+			AssetKindOutputStyles: {
+				Tool: types.ToolIdCursor, Kind: AssetKindOutputStyles,
+				Shape: ShapeNone,
+			},
+			AssetKindPrompts: {
+				Tool: types.ToolIdCursor, Kind: AssetKindPrompts,
+				Shape: ShapeNone,
+			},
+			AssetKindSystemPrompts: {
+				Tool: types.ToolIdCursor, Kind: AssetKindSystemPrompts,
+				Shape: ShapeNone,
+			},
+		},
 	}
 	outputMappings = m
 	return m
@@ -498,9 +537,7 @@ func OutputTargetsForTool(tool types.ToolId) (map[AssetKind]OutputTarget, error)
 // AssetKind in AllAssetKinds(). Used by tests to keep the table exhaustive.
 func ValidateOutputCoverage() error {
 	per := buildOutputMappings()
-	for _, tool := range []types.ToolId{
-		types.ToolIdClaudeCode, types.ToolIdOpenCode, types.ToolIdCopilot, types.ToolIdPi, types.ToolIdOmp, types.ToolIdKiro, types.ToolIdAntigravity,
-	} {
+	for _, tool := range types.SupportedToolIDs {
 		entries, ok := per[tool]
 		if !ok {
 			return fmt.Errorf("output mapping: tool %q has no entries", tool)

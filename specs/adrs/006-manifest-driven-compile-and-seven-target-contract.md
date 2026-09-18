@@ -1,7 +1,7 @@
 # ADR-006: Manifest-Driven Compile and Seven-Target Contract
 
 **Date:** 2026-06-22  
-**Status:** Accepted — implemented in spec 029 cleanup phase  
+**Status:** Accepted — implemented in spec 029 cleanup phase. **Partially superseded by [ADR-009](009-nine-target-contract-codex-stable-cursor-beta.md)** (supported target set and Codex acceptance); manifest, lockfile, and binary-name decisions here remain in force.  
 **Deciders:** LazyAI maintainers
 
 > **Purpose.** Record the V2 compile contract: `.ai/lazyai.json` and `.ai/lock.json` are the authoritative project-level inputs/outputs for setup-core compilation, the supported target set is exactly seven, Codex is not a compile target, and the binary name remains `lazyai-cli`.
@@ -95,8 +95,14 @@ Adopt the V2 compile contract defined by spec 029:
 
 ---
 
+## Amendment 2026-09 (target set)
+
+ADR-009 superseded the seven-target freeze and Codex rejection. The current supported compile target set is nine tools including `codex` (stable adapter) and `cursor` (beta adapter). See [`009-nine-target-contract-codex-stable-cursor-beta.md`](009-nine-target-contract-codex-stable-cursor-beta.md).
+
+---
+
 ## Follow-up Watchouts
 
-- If future work adds or removes supported targets, supersede this ADR instead of silently widening the contract.
+- If future work adds or removes supported targets, supersede ADR-009 (and amend this ADR’s historical record) instead of silently widening the contract.
 - If MCP validation moves to full schema execution, update this ADR’s note about lighter enforcement.
 - If scoped install state is ever merged into the canonical `.ai/` contract, revisit the `.ai-setup.json` boundary explicitly.

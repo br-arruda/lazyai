@@ -6,17 +6,17 @@ This page records the current production-readiness posture for LazyAI docs and s
 
 | Area | Status | Evidence |
 |---|---|---|
-| Supported AI CLI targets | Ready | Adapter registry includes OpenCode, Claude Code, Copilot, Pi, OMP, Kiro, and Antigravity. |
-| Stable adapters | Ready | All seven adapters (OpenCode, Claude Code, Copilot, Pi, Kiro, OMP, Antigravity) are marked stable in adapter capabilities. OMP and Antigravity were promoted from beta on 2026-06-23 after docs verification (#486). |
-| Beta adapters | Ready | None. The last beta adapter (Antigravity/Gemini) was promoted to stable on 2026-06-23 once its two gaps — global-scope skills path and root-instructions discovery — were closed and pinned by conformance tests (#486). |
-| Output mapping | Ready | `output_mapping.go` is the single source of truth for seven asset kinds across seven tools. |
-| Manifest contract | Ready | `.ai/lazyai.json` schema version is `1.0`; target enum is `opencode`, `claude`, `copilot`, `pi`, `omp`, `antigravity`, `kiro`. |
-| MCP compile | Mostly ready | OpenCode, Claude Code, Copilot, OMP, Kiro, and Antigravity emit configs; Pi is intentionally no-op. |
+| Supported AI CLI targets | Ready | Adapter registry includes nine targets: OpenCode, Claude Code, Copilot, Pi, OMP, Kiro, Antigravity, Codex, and Cursor. |
+| Stable adapters | Ready | Eight adapters are stable; Codex promoted 2026-09 (#612, ADR-009). |
+| Beta adapters | Ready | Cursor only (issue #612); limited runtime smoke until maintainer records IDE validation. |
+| Output mapping | Ready | `output_mapping.go` is the single source of truth for asset kinds across nine tools. |
+| Manifest contract | Ready | `.ai/lazyai.json` schema version is `1.0`; target enum includes `codex` and `cursor`. |
+| MCP compile | Mostly ready | OpenCode, Claude Code, Copilot, OMP, Kiro, Antigravity, Codex, and Cursor emit configs; Pi is intentionally no-op. |
 | Docs information architecture | Improved | MkDocs now has an AI CLI Tools section with one page per supported target. |
 
 ## Tracked watchouts
 
-- Beta adapter exit criteria tracked in [#486](https://github.com/rluisb/lazyai/issues/486) are fully cleared: OMP and Antigravity are both stable as of 2026-06-23 (Antigravity's global-skills path and root-instructions discovery gaps are closed and pinned by tests). No adapter remains below stable. See [adapter snapshot](../adapters/snapshots/beta-adapter-verification-2026-06.md).
+- Beta adapter exit criteria for Cursor are tracked in issue #612; Codex exited beta in 2026-09 (ADR-009). See [adapter snapshot 2026-09](../adapters/snapshots/beta-adapter-verification-2026-09.md).
 - Workflow helper ownership is tracked in [#487](https://github.com/rluisb/lazyai/issues/487): ADR-007 must be accepted or superseded before LazyAI emits workflow helpers, and LazyAI must not become a workflow runtime.
 
 ## Quality gates to run before release

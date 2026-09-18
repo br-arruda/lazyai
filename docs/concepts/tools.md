@@ -1,6 +1,6 @@
 # Supported Tools
 
-`lazyai-cli` compiles embedded library content into native formats for seven setup surfaces.
+`lazyai-cli` compiles embedded library content into native formats for nine setup surfaces.
 
 LazyAI's workflow catalog is canonical source material, not a universal runtime surface. Adapters only emit workflow-like behavior through a host tool's verified native format. Unsupported `workflows/` directories are intentionally not created.
 
@@ -70,6 +70,23 @@ LazyAI's workflow catalog is canonical source material, not a universal runtime 
 - **Global scope support:** Yes — `~/.gemini/`
 - **Support level:** stable; Antigravity plugin docs and install locations are snapshot-verified.
 - **Special behavior:** emits `.gemini/settings.json`, `.gemini/hooks/lazyai/*.sh`, selected Agent Skills at `.agents/skills/<name>/SKILL.md`, and MCP config at `~/.gemini/config/mcp_config.json`; no custom agent files are emitted for Antigravity
+
+## Codex
+
+- **Description:** OpenAI Codex CLI: `AGENTS.md`, subagents, MCP in `.codex/config.toml`, hooks, and Agent Skills at `.agents/skills/`
+- **Root file:** `AGENTS.md`
+- **Config directory:** `.codex/`
+- **Support level:** stable (ADR-009)
+- **MCP output:** `.codex/config.toml` `[mcp_servers.*]`
+
+## Cursor
+
+- **Description:** Cursor IDE/CLI: skills, MCP, and hooks under `.cursor/` (beta)
+- **Root file:** `AGENTS.md`
+- **Config directory:** `.cursor/`
+- **Global scope support:** Yes — `~/.cursor/`
+- **Support level:** beta (issue #612); see [cursor adapter](../adapters/cursor.md)
+- **Special behavior:** no LazyAI-managed custom agent profiles or `.mdc` rules
 
 ## Workflow delivery matrix
 

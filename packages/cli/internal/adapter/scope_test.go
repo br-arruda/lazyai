@@ -94,6 +94,10 @@ func TestResolveToolRoot_AllPairs(t *testing.T) {
 		{types.ToolIdCodex, types.SetupScopeProject, want{filepath.Join(target, ".codex"), false}},
 		{types.ToolIdCodex, types.SetupScopeWorkspace, want{filepath.Join(target, ".codex"), false}},
 		{types.ToolIdCodex, types.SetupScopeGlobal, want{filepath.Join(home, ".codex"), false}},
+		// cursor
+		{types.ToolIdCursor, types.SetupScopeProject, want{filepath.Join(target, ".cursor"), false}},
+		{types.ToolIdCursor, types.SetupScopeWorkspace, want{filepath.Join(target, ".cursor"), false}},
+		{types.ToolIdCursor, types.SetupScopeGlobal, want{filepath.Join(home, ".cursor"), false}},
 	}
 
 	for _, c := range cases {

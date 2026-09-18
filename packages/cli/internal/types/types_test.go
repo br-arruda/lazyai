@@ -207,7 +207,7 @@ func TestIsValidExistingSetupPolicy(t *testing.T) {
 func TestIsValidToolId(t *testing.T) {
 	t.Parallel()
 
-	for _, id := range []ToolId{ToolIdOpenCode, ToolIdClaudeCode, ToolIdCopilot, ToolIdPi, ToolIdOmp, ToolIdAntigravity, ToolIdKiro, ToolIdCodex} {
+	for _, id := range []ToolId{ToolIdOpenCode, ToolIdClaudeCode, ToolIdCopilot, ToolIdPi, ToolIdOmp, ToolIdAntigravity, ToolIdKiro, ToolIdCodex, ToolIdCursor} {
 		if !IsValidToolId(id) {
 			t.Errorf("IsValidToolId(%q) = false, want true", id)
 		}

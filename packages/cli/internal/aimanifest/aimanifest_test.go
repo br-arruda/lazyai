@@ -50,6 +50,7 @@ func TestResolveTargets(t *testing.T) {
 		{"dedup", []string{"claude", "claude-code"}, []types.ToolId{types.ToolIdClaudeCode}, false},
 		{"all eight", []string{"opencode", "claude", "copilot", "pi", "omp", "antigravity", "kiro", "codex"}, nil, false},
 		{"codex canonical", []string{"codex"}, []types.ToolId{types.ToolIdCodex}, false},
+		{"cursor canonical", []string{"cursor"}, []types.ToolId{types.ToolIdCursor}, false},
 		{"unknown rejected", []string{"vim"}, nil, true},
 	}
 	for _, tc := range tests {

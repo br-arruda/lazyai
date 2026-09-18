@@ -22,6 +22,8 @@ func TestResolveGlobalToolTargetDir(t *testing.T) {
 		{types.ToolIdKiro, filepath.Join(home, ".kiro")},
 		{types.ToolIdPi, filepath.Join(home, ".pi")},
 		{types.ToolIdAntigravity, filepath.Join(home, ".gemini")},
+		{types.ToolIdCodex, filepath.Join(home, ".codex")},
+		{types.ToolIdCursor, filepath.Join(home, ".cursor")},
 	}
 	for _, c := range cases {
 		got, err := ResolveGlobalToolTargetDir(c.tool, home)
@@ -77,6 +79,7 @@ func TestIsGlobalSupportedTool(t *testing.T) {
 		{types.ToolIdAntigravity, true},
 		{types.ToolId("gemini"), false},
 		{types.ToolIdCodex, true},
+		{types.ToolIdCursor, true},
 	}
 	for _, c := range cases {
 		got := IsGlobalSupportedTool(c.tool)

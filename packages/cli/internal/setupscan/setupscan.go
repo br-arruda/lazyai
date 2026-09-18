@@ -408,6 +408,12 @@ func rootsForTool(tool types.ToolId, opts Options) []rootSpec {
 			toolRootSpec(tool, types.SetupScopeProject, "project", opts, []string{"hooks.json"}, []string{"agents", "config.toml"}),
 			toolRootSpec(tool, types.SetupScopeWorkspace, "workspace", opts, []string{"hooks.json"}, []string{"agents", "config.toml"}),
 		}
+	case types.ToolIdCursor:
+		return []rootSpec{
+			toolRootSpec(tool, types.SetupScopeGlobal, "global", opts, []string{"hooks.json"}, []string{"skills", "mcp.json"}),
+			toolRootSpec(tool, types.SetupScopeProject, "project", opts, []string{"hooks.json"}, []string{"skills", "mcp.json"}),
+			toolRootSpec(tool, types.SetupScopeWorkspace, "workspace", opts, []string{"hooks.json"}, []string{"skills", "mcp.json"}),
+		}
 	}
 	return nil
 }

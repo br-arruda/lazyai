@@ -55,6 +55,8 @@ func builtinAdapter(id types.ToolId) (ToolAdapter, error) {
 		return &AntigravityAdapter{}, nil
 	case types.ToolIdCodex:
 		return &CodexAdapter{}, nil
+	case types.ToolIdCursor:
+		return &CursorAdapter{}, nil
 	default:
 		return nil, fmt.Errorf("unsupported tool %q", id)
 	}
