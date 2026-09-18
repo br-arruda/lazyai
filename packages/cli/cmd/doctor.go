@@ -286,6 +286,14 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	for _, toolId := range storeData.Config.Tools {
+		if toolId == types.ToolIdCursor {
+			fmt.Println()
+			fmt.Printf("  %s %s\n", dimStyle.Render("i"), dimStyle.Render("Cursor: no LazyAI-managed custom agent profiles; use AGENTS.md and skills."))
+			break
+		}
+	}
+
 	// FR-011 security report: MCP inventory, hook/secret/path risks, and
 	// trust/sandbox caveats for configured tools (Pi/Kiro have no sandbox).
 	secReport := buildSecurityReport(dir, storeData.Config.Tools, resolveValidateProfile(dir))

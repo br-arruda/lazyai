@@ -838,4 +838,5 @@ func boldStyle() lipgloss.Style {
 var perToolMCPConfig = map[string]string{
 	"opencode": "opencode.json",
 	"copilot":  ".vscode/mcp.json",
+	"cursor":   ".cursor/mcp.json",
 }

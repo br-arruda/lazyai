@@ -66,6 +66,15 @@ var ToolOverrideMap = map[string]ToolOverrides{
 			"- Skills: `.agents/skills/<name>/SKILL.md` (read natively by Codex)\n" +
 			"- Hooks: `.codex/hooks.json`.",
 	},
+	string(types.ToolIdCursor): {
+		Description: "This project uses Cursor with LazyAI integration.",
+		Notes: "## Cursor-Specific Notes\n\n" +
+			"- Project instructions: `AGENTS.md` at project root\n" +
+			"- MCP servers: `.cursor/mcp.json` (`mcpServers`)\n" +
+			"- Skills: `.cursor/skills/<name>/SKILL.md`\n" +
+			"- Hooks: `.cursor/hooks.json`\n" +
+			"- LazyAI does not emit custom agent profiles or `.mdc` rules.",
+	},
 }
 
 // CompiledFile represents a single compiled output file.

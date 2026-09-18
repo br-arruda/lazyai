@@ -91,6 +91,7 @@ var toolDescriptions = map[string]string{
 	"kiro":        "Adds Kiro steering and agent assets.",
 	"antigravity": "Adds Antigravity rules and generated configuration.",
 	"codex":       "Adds OpenAI Codex CLI config: AGENTS.md, MCP in .codex/config.toml, subagents, and hooks.",
+	"cursor":      "Adds Cursor IDE/CLI skills, MCP in .cursor/mcp.json, and hooks. No custom agent profiles; use AGENTS.md.",
 }
 
 var skillDescriptions = map[string]string{
