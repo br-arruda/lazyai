@@ -29,4 +29,4 @@ Use shared `AGENTS.md` and skills for specialist behavior. `lazyai-cli doctor` p
 - [Cursor MCP](https://cursor.com/docs/mcp)
 - [Cursor Hooks](https://cursor.com/docs/hooks)
 - Issue [#612](https://github.com/rluisb/lazyai/issues/612)
-- ADR [`specs/adrs/009-nine-target-contract-codex-stable-cursor-beta.md`](../../specs/adrs/009-nine-target-contract-codex-stable-cursor-beta.md)
+- ADR [009 nine-target contract (Codex stable, Cursor beta)](https://github.com/rluisb/lazyai/blob/main/specs/adrs/009-nine-target-contract-codex-stable-cursor-beta.md)
